@@ -1,8 +1,11 @@
 import { render, screen } from '@testing-library/react';
 import App from './App';
 
-test('renders learn react link', () => {
+test('renders the role selection landing page', () => {
   render(<App />);
-  const linkElement = screen.getByText(/learn react/i);
-  expect(linkElement).toBeInTheDocument();
+
+  expect(screen.getByText(/prototype view sewa/i)).toBeInTheDocument();
+  expect(screen.getByRole('link', { name: /Go to Admin View/i })).toBeInTheDocument();
+  expect(screen.getByRole('link', { name: /Go to Worker View/i })).toBeInTheDocument();
+  expect(screen.getByRole('link', { name: /Go to Client View/i })).toBeInTheDocument();
 });
