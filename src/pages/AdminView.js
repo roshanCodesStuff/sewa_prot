@@ -277,12 +277,6 @@ export default function AdminView() {
     }
   };
 
-  const summaryCards = [
-    { label: 'Active Categories', value: Object.keys(floors).length, accent: '#3b82f6', delta: '+12%', deltaText: 'AI insight: Optimal coverage' },
-    { label: 'Approved Workers', value: workers.filter(w => w.status === 'Approved').length, accent: '#10b981', delta: 'Stable', deltaText: 'AI insight: Verification pending' },
-    { label: 'Pending Complaints', value: clientComplaints.filter(c => c.status === 'Pending').length, accent: '#f59e0b', delta: '+1 new', deltaText: 'AI insight: High priority detected' },
-    { label: 'Open Security Flags', value: disputes.length, accent: '#ef4444', delta: '-50%', deltaText: 'AI insight: Risk level moderate' }
-  ];
 
   return (
     <div style={styles.pageLayout}>
@@ -352,18 +346,7 @@ export default function AdminView() {
           </div>
         </div>
 
-        <div style={styles.summaryGrid}>
-          {summaryCards.map((card) => (
-            <div key={card.label} style={{ ...styles.summaryCard, borderColor: card.accent, boxShadow: `inset 0 0 0 1px ${card.accent}55` }}>
-              <div style={{ ...styles.summaryLabel, color: card.accent }}>{card.label}</div>
-              <div style={styles.summaryRow}>
-                <strong style={styles.summaryValue}>{card.value}</strong>
-                <span style={{ ...styles.summaryDelta, color: card.accent }}>{card.delta}</span>
-              </div>
-              <div style={styles.summaryHint}>{card.deltaText}</div>
-            </div>
-          ))}
-        </div>
+        
 
         {activeTab === 'floors' && (
           <section style={styles.section}>
