@@ -76,6 +76,16 @@ export default function ClientView() {
 
   const [selectedJobForBids, setSelectedJobForBids] = useState(null);
 
+  // Messaging State
+  const [activeChatJobId, setActiveChatJobId] = useState("JOB-102");
+  const [chatMessages, setChatMessages] = useState({
+    "JOB-102": [
+      { id: 1, sender: "Bikash Tamang", role: "worker", text: "Namaste sir! I have accepted the job request. I will arrive around 2 PM.", timestamp: "10:30 AM" },
+      { id: 2, sender: "Aarav Sharma", role: "client", text: "Great, thank you! Please bring extra 16A circuit breakers if possible.", timestamp: "10:32 AM" }
+    ]
+  });
+  const [newMessageText, setNewMessageText] = useState("");
+
   const [completedServices] = useState([
     { id: "JOB-088", category: "Deep Home Cleaning", title: "Full Apartment Deep Clean", date: "2026-01-15", workerName: "Sita Thapa", paidAmount: 1400, review: { rating: 5, comment: "Excellent service. Very thorough cleaning of the balcony and kitchen." } },
     { id: "JOB-072", category: "AC Repair & Service", title: "Living Room AC Filter Change", date: "2025-11-02", workerName: "Hari Poudel", paidAmount: 850, review: { rating: 4, comment: "Quick response and fixed the cooling issue within an hour." } },
@@ -88,6 +98,8 @@ export default function ClientView() {
     { id: "JOB-019", category: "Washing Machine Repair", title: "Drainage Pump Inspection", date: "2025-04-12", workerName: "Sanjay Joshi", paidAmount: 700, review: { rating: 3, comment: "Resolved issue but arrived late." } },
     { id: "JOB-012", category: "Sofa & Carpet Cleaning", title: "3-Seater Sofa Shampooing", date: "2025-03-01", workerName: "Anish Maharjan", paidAmount: 950, review: { rating: 5, comment: "Stains completely removed!" } }
   ]);
+
+  const assignedJobs = activeJobs.filter(j => j.status === "Assigned");
 
   const allJobsForSelection = [
     ...activeJobs.map(j => ({ id: j.id, title: j.title, category: j.category, status: j.status })),
@@ -237,7 +249,25 @@ export default function ClientView() {
       if (selectedJobForBids && selectedJobForBids.id === jobId) {
         setSelectedJobForBids(newlyUpdatedJob);
       }
-      alert(`Bid accepted! Technician ${acceptedBid.workerName} assigned. Remaining bids marked as rejected.`);
+
+      // Initialize system chat thread for accepted worker
+      if (!chatMessages[jobId]) {
+        setChatMessages(prev => ({
+          ...prev,
+          [jobId]: [
+            {
+              id: Date.now(),
+              sender: acceptedBid.workerName,
+              role: "worker",
+              text: `Hello ${clientProfile.name}, thanks for accepting my bid! I will contact you shortly regarding the details.`,
+              timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            }
+          ]
+        }));
+      }
+
+      setActiveChatJobId(jobId);
+      alert(`Bid accepted! Technician ${acceptedBid.workerName} assigned. You can now chat with them directly.`);
     }
   };
 
@@ -254,6 +284,31 @@ export default function ClientView() {
     if (selectedJobForBids && selectedJobForBids.id === jobId) {
       setSelectedJobForBids(newlyUpdatedJob);
     }
+  };
+
+  const handleSendMessage = (e) => {
+    e.preventDefault();
+    if (!newMessageText.trim() || !activeChatJobId) return;
+
+    const newMsg = {
+      id: Date.now(),
+      sender: clientProfile.name,
+      role: "client",
+      text: newMessageText.trim(),
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    };
+
+    setChatMessages(prev => ({
+      ...prev,
+      [activeChatJobId]: [...(prev[activeChatJobId] || []), newMsg]
+    }));
+
+    setNewMessageText("");
+  };
+
+  const handleOpenChat = (jobId) => {
+    setActiveChatJobId(jobId);
+    setActiveTab('messages');
   };
 
   const handleFileComplaint = (e) => {
@@ -285,6 +340,7 @@ export default function ClientView() {
   );
 
   const selectedFloor = categoryFloors[jobForm.category] || 0;
+  const activeChatJob = activeJobs.find(j => j.id === activeChatJobId);
 
   return (
     <div style={styles.pageLayout}>
@@ -306,6 +362,12 @@ export default function ClientView() {
               onClick={() => setActiveTab('myJobs')}
             >
               My Requests ({activeJobs.length})
+            </button>
+            <button
+              style={activeTab === 'messages' ? styles.navBtnActive : styles.navBtn}
+              onClick={() => setActiveTab('messages')}
+            >
+              Messages {assignedJobs.length > 0 ? `(${assignedJobs.length})` : ''}
             </button>
             <button
               style={activeTab === 'profile' ? styles.navBtnActive : styles.navBtn}
@@ -458,7 +520,7 @@ export default function ClientView() {
         {activeTab === 'myJobs' && (
           <section style={styles.section}>
             <h2>My Active Requests</h2>
-            <p style={styles.subtext}>Track received technician bids, manage offers, or delete open requests.</p>
+            <p style={styles.subtext}>Track received technician bids, manage offers, or chat with assigned workers.</p>
 
             <table style={styles.table}>
               <thead>
@@ -501,7 +563,12 @@ export default function ClientView() {
                           Delete
                         </button>
                       ) : (
-                        <span style={{ color: '#888', fontSize: '12px' }}>Locked</span>
+                        <button
+                          onClick={() => handleOpenChat(job.id)}
+                          style={styles.btnChatSmall}
+                        >
+                          💬 Chat with Worker
+                        </button>
                       )}
                     </td>
                   </tr>
@@ -547,6 +614,72 @@ export default function ClientView() {
                     <p style={{ color: '#666', marginTop: '15px' }}>No bids received for this request yet.</p>
                   )}
                 </div>
+              </div>
+            )}
+          </section>
+        )}
+
+        {activeTab === 'messages' && (
+          <section style={styles.section}>
+            <h2>Messages & Work Coordination</h2>
+            <p style={styles.subtext}>Chat with assigned technicians to discuss job schedules and requirements.</p>
+
+            {assignedJobs.length > 0 ? (
+              <div style={styles.chatContainer}>
+                <div style={styles.chatSidebar}>
+                  <h4 style={{ margin: '0 0 10px 0', fontSize: '14px', color: '#555' }}>Assigned Jobs</h4>
+                  {assignedJobs.map(job => (
+                    <div
+                      key={job.id}
+                      onClick={() => setActiveChatJobId(job.id)}
+                      style={activeChatJobId === job.id ? styles.chatTabActive : styles.chatTab}
+                    >
+                      <strong>{job.workerName}</strong>
+                      <div style={{ fontSize: '12px', color: '#666', marginTop: '2px' }}>{job.title} ({job.id})</div>
+                    </div>
+                  ))}
+                </div>
+
+                <div style={styles.chatBox}>
+                  {activeChatJob ? (
+                    <>
+                      <div style={styles.chatHeader}>
+                        <strong>Technician: {activeChatJob.workerName}</strong>
+                        <span style={{ fontSize: '12px', color: '#666' }}>Job: {activeChatJob.title}</span>
+                      </div>
+
+                      <div style={styles.chatMessagesList}>
+                        {(chatMessages[activeChatJobId] || []).map(msg => (
+                          <div
+                            key={msg.id}
+                            style={msg.role === 'client' ? styles.clientBubble : styles.workerBubble}
+                          >
+                            <div style={styles.msgSender}>{msg.sender}</div>
+                            <div>{msg.text}</div>
+                            <div style={styles.msgTime}>{msg.timestamp}</div>
+                          </div>
+                        ))}
+                      </div>
+
+                      <form onSubmit={handleSendMessage} style={styles.chatInputRow}>
+                        <input
+                          type="text"
+                          placeholder="Type your message here..."
+                          value={newMessageText}
+                          onChange={(e) => setNewMessageText(e.target.value)}
+                          style={styles.chatInput}
+                        />
+                        <button type="submit" style={styles.btnPrimary}>Send</button>
+                      </form>
+                    </>
+                  ) : (
+                    <div style={{ padding: '20px', color: '#888' }}>Select a conversation from the left to start chatting.</div>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div style={{ color: '#888', padding: '20px 0' }}>
+                No assigned technicians yet. Once you accept a worker's bid, messaging will open here.
               </div>
             )}
           </section>
@@ -730,6 +863,7 @@ const styles = {
   btnPrimary: { backgroundColor: '#007bff', color: '#fff', border: 'none', padding: '10px 16px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', alignSelf: 'flex-start' },
   btnDanger: { backgroundColor: '#dc3545', color: '#fff', border: 'none', padding: '10px 16px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', alignSelf: 'flex-start' },
   btnDangerSmall: { backgroundColor: '#dc3545', color: '#fff', border: 'none', padding: '5px 10px', borderRadius: '4px', cursor: 'pointer', fontSize: '12px', fontWeight: 'bold' },
+  btnChatSmall: { backgroundColor: '#28a745', color: '#fff', border: 'none', padding: '5px 10px', borderRadius: '4px', cursor: 'pointer', fontSize: '12px', fontWeight: 'bold' },
   btnSuccess: { backgroundColor: '#28a745', color: '#fff', border: 'none', padding: '5px 10px', borderRadius: '4px', cursor: 'pointer', fontSize: '12px', fontWeight: 'bold' },
   btnSecondarySmall: { backgroundColor: '#6c757d', color: '#fff', border: 'none', padding: '6px 10px', borderRadius: '4px', cursor: 'pointer', fontSize: '12px', fontWeight: 'bold' },
   btnCall: { backgroundColor: '#17a2b8', color: '#fff', border: 'none', padding: '5px 10px', borderRadius: '4px', fontSize: '12px', cursor: 'pointer', fontWeight: 'bold' },
@@ -756,5 +890,18 @@ const styles = {
   btnClose: { backgroundColor: '#6c757d', color: '#fff', border: 'none', padding: '4px 8px', borderRadius: '4px', cursor: 'pointer' },
   bidsList: { display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '15px' },
   bidCard: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', backgroundColor: '#f8f9fa', border: '1px solid #e9ecef', borderRadius: '6px' },
-  bidAmount: { color: '#28a745', fontWeight: 'bold', fontSize: '14px', marginTop: '2px' }
+  bidAmount: { color: '#28a745', fontWeight: 'bold', fontSize: '14px', marginTop: '2px' },
+  chatContainer: { display: 'flex', border: '1px solid #e1e8ed', borderRadius: '8px', minHeight: '400px', backgroundColor: '#fff' },
+  chatSidebar: { width: '220px', borderRight: '1px solid #eee', padding: '12px', backgroundColor: '#fafafa' },
+  chatTab: { padding: '10px', borderRadius: '6px', cursor: 'pointer', marginBottom: '6px', backgroundColor: '#fff', border: '1px solid #eee' },
+  chatTabActive: { padding: '10px', borderRadius: '6px', cursor: 'pointer', marginBottom: '6px', backgroundColor: '#e8f4fd', border: '1px solid #b6d4fe' },
+  chatBox: { flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' },
+  chatHeader: { padding: '12px 16px', borderBottom: '1px solid #eee', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#fafafa' },
+  chatMessagesList: { flex: 1, padding: '16px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '10px' },
+  clientBubble: { alignSelf: 'flex-end', backgroundColor: '#007bff', color: '#fff', padding: '10px 14px', borderRadius: '12px 12px 0 12px', maxWidth: '70%', fontSize: '14px' },
+  workerBubble: { alignSelf: 'flex-start', backgroundColor: '#e9ecef', color: '#333', padding: '10px 14px', borderRadius: '12px 12px 12px 0', maxWidth: '70%', fontSize: '14px' },
+  msgSender: { fontSize: '11px', opacity: 0.8, marginBottom: '2px', fontWeight: 'bold' },
+  msgTime: { fontSize: '10px', opacity: 0.7, marginTop: '4px', textAlign: 'right' },
+  chatInputRow: { display: 'flex', gap: '10px', padding: '12px', borderTop: '1px solid #eee', backgroundColor: '#fff' },
+  chatInput: { flex: 1, padding: '8px 12px', fontSize: '14px', border: '1px solid #ccc', borderRadius: '4px' }
 };
