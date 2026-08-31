@@ -3,6 +3,10 @@ import { Link } from 'react-router-dom';
 
 export default function ClientView() {
   const [activeTab, setActiveTab] = useState('post');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [photo, setPhoto] = useState(null);
+  const [video, setVideo] = useState(null);
+  const [errorMessage, setErrorMessage] = useState('');
 
   const [clientProfile] = useState({
     name: "Aarav Sharma",
@@ -31,6 +35,53 @@ export default function ClientView() {
     "Full Body Massage": 1200,
   };
 
+  const categoryIcons = {
+    "Plumbing": "🚰",
+    "Electrical": "⚡",
+    "Carpentry": "🪚",
+    "Masonry": "🧱",
+    "Painting": "🎨",
+    "Deep Home Cleaning": "🧹",
+    "Sofa & Carpet Cleaning": "🛋️",
+    "Pest Control": "🪲",
+    "Water Tank Cleaning": "🛢️",
+    "AC Repair & Service": "❄️",
+    "Washing Machine Repair": "🧺",
+    "Refrigerator Service": "🧊",
+    "Microwave Repair": "📻",
+    "Salon at Home (Women)": "💇‍♀️",
+    "Men's Haircut & Grooming": "💈",
+    "Full Body Massage": "💆‍♂️",
+  };
+
+  const subCategoriesData = {
+    "Plumbing": ["Tap & Sink Leak Repair", "Pipe Fitting & Unclogging", "Drain Blockage Clearing", "Toilet Flush Repair", "Water Heater (Geyser) Service"],
+    "Electrical": ["Switch & Socket Repair", "Short Circuit Inspection", "Ceiling Fan Installation", "MCB Box Maintenance", "Wiring & Re-wiring"],
+    "Carpentry": ["Furniture Assembly", "Door Lock & Hinge Repair", "Custom Cabinet Work", "Bed Frame Fixing", "Wooden Polish & Restoration"],
+    "Masonry": ["Tile & Marble Patching", "Wall Plaster Repair", "Brickwork & Concrete", "Waterproofing Crack Repair", "Floor Grouting"],
+    "Painting": ["Single Room Accent Wall", "Full Interior Painting", "Exterior Wall Painting", "Waterproof Wall Coating", "Door & Window Spray Painting"],
+    "Deep Home Cleaning": ["Full House Deep Clean", "Kitchen Deep Scrubbing", "Bathroom Disinfection", "Balcony & Glass Cleaning", "Post-Construction Clean"],
+    "Sofa & Carpet Cleaning": ["3-Seater Sofa Shampooing", "Full Carpet Stain Removal", "Dining Chair Upholstery", "Mattress Steam Clean", "Curtain Cleaning"],
+    "Pest Control": ["Ant Infestation Control", "Bed Bug Heat Treatment", "Cockroach Control Spray", "Termite Extermination", "Rodent & Rat Control"],
+    "Water Tank Cleaning": ["500L Overhead Tank Clean", "1000L Overhead Tank Clean", "Underground Sump Cleaning", "Sludge Extraction & Sanitizing", "Commercial Tank Clean"],
+    "AC Repair & Service": ["Seasonal Filter Cleaning", "Gas Refilling (R32/R410)", "Water Leakage Repair", "PCB Board Service", "AC Installation & Uninstallation"],
+    "Washing Machine Repair": ["Front Load Service", "Top Load Drainage Issue", "Drum Bearing Replacement", "Spin Cycle Repair", "PCB Circuit Fix"],
+    "Refrigerator Service": ["Gas Refill & Compressor", "Cooling Coil Defrosting", "Door Seal Gasket Change", "Water Leakage Fix", "Thermostat Replacement"],
+    "Microwave Repair": ["Heating Element Replacement", "Turntable Motor Fix", "Touchpad Button Repair", "High Voltage Diode Fix", "Power Cable Replacement"],
+    "Salon at Home (Women)": ["Facial & Cleanup", "Full Body Waxing", "Manicure & Pedicure", "Hair Spa & Blowdry", "Bridal Makeup Package"],
+    "Men's Haircut & Grooming": ["Classic Haircut & Style", "Beard Trim & Shape", "Face De-Tan & Massage", "Head Oil Massage", "Hair Color & Dye"],
+    "Full Body Massage": ["Deep Tissue Swedish Massage", "Ayurvedic Herbal Oil Massage", "Aromatherapy Stress Relief", "Foot Reflexology", "Back & Shoulder Relief"],
+  };
+
+  const popularSewas = [
+    { title: "Furniture Assembly", category: "Carpentry", price: 500, image: "https://images.unsplash.com/photo-1581539250439-c96689b516dd?auto=format&fit=crop&w=600&q=80" },
+    { title: "Ant & Pest Control", category: "Pest Control", price: 1500, image: "https://images.unsplash.com/photo-1628177142898-93e36e4e3a50?auto=format&fit=crop&w=600&q=80" },
+    { title: "AC Repair & Refill", category: "AC Repair & Service", price: 700, image: "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?auto=format&fit=crop&w=600&q=80" },
+    { title: "Home Deep Cleaning", category: "Deep Home Cleaning", price: 1200, image: "https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=600&q=80" },
+    { title: "Minor Plumbing Fixes", category: "Plumbing", price: 300, image: "https://images.unsplash.com/photo-1607472586893-edb57bdc0e39?auto=format&fit=crop&w=600&q=80" },
+    { title: "Short Circuit Check", category: "Electrical", price: 800, image: "https://images.unsplash.com/photo-1621905252507-b35492cc74b4?auto=format&fit=crop&w=600&q=80" },
+  ];
+
   const [showAlternatePhone, setShowAlternatePhone] = useState(false);
   const [jobForm, setJobForm] = useState({
     category: 'Plumbing',
@@ -38,18 +89,13 @@ export default function ClientView() {
     description: '',
     budget: 300,
     alternatePhone: '',
-    photo: null,
-    video: null,
   });
-
-  const [photoPreview, setPhotoPreview] = useState(null);
-  const [videoPreview, setVideoPreview] = useState(null);
 
   const [activeJobs, setActiveJobs] = useState([
     {
       id: "JOB-101",
       category: "Plumbing",
-      title: "Leaking Kitchen Sink",
+      title: "Tap & Sink Leak Repair",
       budget: 450,
       status: "Open",
       hasMedia: true,
@@ -62,7 +108,7 @@ export default function ClientView() {
     {
       id: "JOB-102",
       category: "Electrical",
-      title: "Short Circuit in Living Room",
+      title: "Short Circuit Inspection",
       budget: 900,
       status: "Assigned",
       workerName: "Bikash Tamang",
@@ -76,7 +122,6 @@ export default function ClientView() {
 
   const [selectedJobForBids, setSelectedJobForBids] = useState(null);
 
-  // Messaging State
   const [activeChatJobId, setActiveChatJobId] = useState("JOB-102");
   const [chatMessages, setChatMessages] = useState({
     "JOB-102": [
@@ -87,16 +132,8 @@ export default function ClientView() {
   const [newMessageText, setNewMessageText] = useState("");
 
   const [completedServices] = useState([
-    { id: "JOB-088", category: "Deep Home Cleaning", title: "Full Apartment Deep Clean", date: "2026-01-15", workerName: "Sita Thapa", paidAmount: 1400, review: { rating: 5, comment: "Excellent service. Very thorough cleaning of the balcony and kitchen." } },
-    { id: "JOB-072", category: "AC Repair & Service", title: "Living Room AC Filter Change", date: "2025-11-02", workerName: "Hari Poudel", paidAmount: 850, review: { rating: 4, comment: "Quick response and fixed the cooling issue within an hour." } },
-    { id: "JOB-065", category: "Plumbing", title: "Bathroom Pipe Leak Repair", date: "2025-10-18", workerName: "Ramesh Sharma", paidAmount: 500, review: { rating: 5, comment: "Fixed the leak quickly without any mess." } },
-    { id: "JOB-054", category: "Electrical", title: "Ceiling Fan Installation", date: "2025-09-10", workerName: "Bikash Tamang", paidAmount: 900, review: { rating: 4, comment: "Good wiring work and clean installation." } },
-    { id: "JOB-049", category: "Pest Control", title: "Cockroach Control Service", date: "2025-08-22", workerName: "Kiran Sunar", paidAmount: 1600, review: { rating: 5, comment: "Pest free ever since. Highly recommended." } },
-    { id: "JOB-041", category: "Carpentry", title: "Door Hinge Replacement", date: "2025-07-05", workerName: "Manoj Rai", paidAmount: 600, review: { rating: 4, comment: "Smooth hinge repair." } },
-    { id: "JOB-033", category: "Painting", title: "Bedroom Accent Wall Paint", date: "2025-06-14", workerName: "Rajesh Shrestha", paidAmount: 2500, review: { rating: 5, comment: "Beautiful finish and neat work." } },
-    { id: "JOB-028", category: "Water Tank Cleaning", title: "1000L Overhead Tank Clean", date: "2025-05-30", workerName: "Dipendra Oli", paidAmount: 1100, review: { rating: 4, comment: "Thorough cleaning process." } },
-    { id: "JOB-019", category: "Washing Machine Repair", title: "Drainage Pump Inspection", date: "2025-04-12", workerName: "Sanjay Joshi", paidAmount: 700, review: { rating: 3, comment: "Resolved issue but arrived late." } },
-    { id: "JOB-012", category: "Sofa & Carpet Cleaning", title: "3-Seater Sofa Shampooing", date: "2025-03-01", workerName: "Anish Maharjan", paidAmount: 950, review: { rating: 5, comment: "Stains completely removed!" } }
+    { id: "JOB-088", category: "Deep Home Cleaning", title: "Full House Deep Clean", date: "2026-01-15", workerName: "Sita Thapa", paidAmount: 1400, review: { rating: 5, comment: "Excellent service. Very thorough cleaning of the balcony and kitchen." } },
+    { id: "JOB-072", category: "AC Repair & Service", title: "Seasonal Filter Cleaning", date: "2025-11-02", workerName: "Hari Poudel", paidAmount: 850, review: { rating: 4, comment: "Quick response and fixed the cooling issue within an hour." } },
   ]);
 
   const assignedJobs = activeJobs.filter(j => j.status === "Assigned");
@@ -110,73 +147,71 @@ export default function ClientView() {
   const [selectedJobForComplaint, setSelectedJobForComplaint] = useState(null);
   const [complaintForm, setComplaintForm] = useState({ issue: '' });
   const [complaints, setComplaints] = useState([
-    { id: "CMP-301", jobId: "JOB-102", jobTitle: "Short Circuit in Living Room", issue: "Technician arrived late and charged extra.", status: "Pending" }
+    { id: "CMP-301", jobId: "JOB-102", jobTitle: "Short Circuit Inspection", issue: "Technician arrived late and charged extra.", status: "Pending" }
   ]);
-  const [errorMsg, setErrorMsg] = useState('');
 
   const totalRequestsCount = activeJobs.length + completedServices.length;
+
+  const filteredCategories = Object.keys(categoryIcons).filter((cat) => {
+    const query = searchQuery.toLowerCase().trim();
+    if (!query) return true;
+    
+    const matchesCategory = cat.toLowerCase().includes(query);
+    const subCats = subCategoriesData[cat] || [];
+    const matchesSubcategory = subCats.some(sub => sub.toLowerCase().includes(query));
+
+    return matchesCategory || matchesSubcategory;
+  });
+
+  const handleSearchChange = (e) => {
+    const query = e.target.value;
+    setSearchQuery(query);
+
+    const matches = Object.keys(categoryIcons).filter((cat) => {
+      const q = query.toLowerCase().trim();
+      if (!q) return true;
+      return cat.toLowerCase().includes(q) || (subCategoriesData[cat] || []).some(sub => sub.toLowerCase().includes(q));
+    });
+
+    if (matches.length > 0 && !matches.includes(jobForm.category)) {
+      handleCategoryChange(matches[0]);
+    }
+  };
 
   const handleCategoryChange = (cat) => {
     const defaultFloor = categoryFloors[cat] || 0;
     setJobForm({
       ...jobForm,
       category: cat,
+      title: '',
       budget: defaultFloor,
     });
-    setErrorMsg('');
+    setErrorMessage('');
   };
 
-  const handlePhotoChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      if (!file.type.startsWith('image/')) {
-        setErrorMsg('Please select a valid image file.');
-        return;
-      }
-      setJobForm({ ...jobForm, photo: file });
-      setPhotoPreview(URL.createObjectURL(file));
-      setErrorMsg('');
-    }
-  };
-
-  const handleVideoChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      if (!file.type.startsWith('video/')) {
-        setErrorMsg('Please select a valid video file.');
-        return;
-      }
-
-      const tempVideo = document.createElement('video');
-      tempVideo.preload = 'metadata';
-      tempVideo.src = URL.createObjectURL(file);
-
-      tempVideo.onloadedmetadata = () => {
-        window.URL.revokeObjectURL(tempVideo.src);
-        if (tempVideo.duration > 10.5) {
-          setErrorMsg('Video duration must be 10 seconds or less.');
-          setJobForm({ ...jobForm, video: null });
-          setVideoPreview(null);
-        } else {
-          setJobForm({ ...jobForm, video: file });
-          setVideoPreview(URL.createObjectURL(file));
-          setErrorMsg('');
-        }
-      };
-    }
-  };
-
-  const handlePostJob = (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
+    setErrorMessage('');
+
+    if (!photo) {
+      setErrorMessage('Please upload a photo before submitting.');
+      return;
+    }
+
+    if (!video) {
+      setErrorMessage('Please upload a 10-second video before submitting.');
+      return;
+    }
+
     const minFloor = categoryFloors[jobForm.category] || 0;
 
     if (Number(jobForm.budget) < minFloor) {
-      setErrorMsg(`Budget cannot be lower than the NRS ${minFloor} floor for ${jobForm.category}.`);
+      setErrorMessage(`Budget cannot be lower than the NRS ${minFloor} floor for ${jobForm.category}.`);
       return;
     }
 
     if (!jobForm.title) {
-      setErrorMsg('Please fill in all required fields.');
+      setErrorMessage('Please select a subcategory or enter a task title.');
       return;
     }
 
@@ -186,7 +221,7 @@ export default function ClientView() {
       title: jobForm.title,
       budget: Number(jobForm.budget),
       status: "Open",
-      hasMedia: Boolean(jobForm.photo || jobForm.video),
+      hasMedia: true,
       assignedWorkerId: null,
       bids: []
     };
@@ -198,15 +233,38 @@ export default function ClientView() {
       description: '',
       budget: categoryFloors['Plumbing'],
       alternatePhone: '',
-      photo: null,
-      video: null,
     });
+    setPhoto(null);
+    setVideo(null);
     setShowAlternatePhone(false);
-    setPhotoPreview(null);
-    setVideoPreview(null);
-    setErrorMsg('');
-    alert('Job request posted successfully.');
+    alert('Job request posted successfully with required media!');
     setActiveTab('myJobs');
+  };
+
+  const handleSubcategoryClick = (subCat) => {
+    setJobForm({
+      ...jobForm,
+      title: subCat
+    });
+
+    const formElement = document.getElementById('post-request-form');
+    if (formElement) {
+      formElement.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  const handleQuickBookPopular = (sewa) => {
+    setJobForm({
+      category: sewa.category,
+      title: sewa.title,
+      description: `I need help with ${sewa.title}.`,
+      budget: sewa.price,
+      alternatePhone: '',
+    });
+    const formElement = document.getElementById('post-request-form');
+    if (formElement) {
+      formElement.scrollIntoView({ behavior: 'smooth' });
+    }
   };
 
   const handleDeleteJob = (jobId) => {
@@ -250,7 +308,6 @@ export default function ClientView() {
         setSelectedJobForBids(newlyUpdatedJob);
       }
 
-      // Initialize system chat thread for accepted worker
       if (!chatMessages[jobId]) {
         setChatMessages(prev => ({
           ...prev,
@@ -343,185 +400,264 @@ export default function ClientView() {
   const activeChatJob = activeJobs.find(j => j.id === activeChatJobId);
 
   return (
-    <div style={styles.pageLayout}>
-      <aside style={styles.sidebar}>
-        <div>
-          <div style={styles.sidebarHeader}>
-            <h2 style={styles.sidebarTitle}>Client Portal</h2>
-            <p style={styles.userBadge}>{clientProfile.name}</p>
-          </div>
-          <nav style={styles.navMenu}>
-            <button
-              style={activeTab === 'post' ? styles.navBtnActive : styles.navBtn}
-              onClick={() => setActiveTab('post')}
-            >
-              Post a Request
-            </button>
-            <button
-              style={activeTab === 'myJobs' ? styles.navBtnActive : styles.navBtn}
-              onClick={() => setActiveTab('myJobs')}
-            >
-              My Requests ({activeJobs.length})
-            </button>
-            <button
-              style={activeTab === 'messages' ? styles.navBtnActive : styles.navBtn}
-              onClick={() => setActiveTab('messages')}
-            >
-              Messages {assignedJobs.length > 0 ? `(${assignedJobs.length})` : ''}
-            </button>
-            <button
-              style={activeTab === 'profile' ? styles.navBtnActive : styles.navBtn}
-              onClick={() => setActiveTab('profile')}
-            >
-              My Profile
-            </button>
-            <button
-              style={activeTab === 'complaint' ? styles.navBtnActive : styles.navBtn}
-              onClick={() => setActiveTab('complaint')}
-            >
-              File a Complaint
-            </button>
-          </nav>
+    <div style={styles.appContainer}>
+      <header style={styles.navbar}>
+        <div style={styles.navBrand}>
+          {/* Clicking logo navigates to Book a Task */}
+          <span
+            style={{ ...styles.logoText, cursor: 'pointer' }}
+            onClick={() => setActiveTab('post')}
+          >
+            sewa
+          </span>
         </div>
+        <nav style={styles.navLinks}>
+          <button
+            style={activeTab === 'post' ? styles.navLinkActive : styles.navLink}
+            onClick={() => setActiveTab('post')}
+          >
+            Book a Task
+          </button>
+          <button
+            style={activeTab === 'myJobs' ? styles.navLinkActive : styles.navLink}
+            onClick={() => setActiveTab('myJobs')}
+          >
+            My Requests ({activeJobs.length})
+          </button>
+          <button
+            style={activeTab === 'messages' ? styles.navLinkActive : styles.navLink}
+            onClick={() => setActiveTab('messages')}
+          >
+            Messages {assignedJobs.length > 0 ? `(${assignedJobs.length})` : ''}
+          </button>
+          <button
+            style={activeTab === 'profile' ? styles.navLinkActive : styles.navLink}
+            onClick={() => setActiveTab('profile')}
+          >
+            My Profile
+          </button>
+          <button
+            style={activeTab === 'complaint' ? styles.navLinkActive : styles.navLink}
+            onClick={() => setActiveTab('complaint')}
+          >
+            File Complaint
+          </button>
+          <Link to="/" style={styles.btnOutline}>Exit Client Portal</Link>
+        </nav>
+      </header>
 
-        <div style={styles.sidebarFooter}>
-          <Link to="/" style={styles.backLink}>← Back to Home</Link>
-        </div>
-      </aside>
+      {activeTab === 'post' && (
+        <>
+          <section style={styles.heroSection}>
+            <h1 style={styles.heroTitle}>Book trusted help for home tasks</h1>
 
-      <main style={styles.contentArea}>
-        {activeTab === 'post' && (
-          <section style={styles.section}>
-            <h2>Post a Job Request</h2>
-            <p style={styles.subtext}>Find reliable local technicians for your home repair or service needs.</p>
+            <div style={styles.searchBarContainer}>
+              <input
+                type="text"
+                placeholder="What do you need help with?"
+                value={searchQuery}
+                onChange={handleSearchChange}
+                style={styles.searchInput}
+              />
+              <button style={styles.searchBtn}>🔍</button>
+            </div>
 
-            {errorMsg && <div style={styles.alertError}>{errorMsg}</div>}
+            <div style={styles.categoryStrip}>
+              {filteredCategories.length > 0 ? (
+                filteredCategories.map((cat) => (
+                  <button
+                    key={cat}
+                    onClick={() => handleCategoryChange(cat)}
+                    style={jobForm.category === cat ? styles.categoryIconActive : styles.categoryIcon}
+                  >
+                    <span style={{ fontSize: '26px' }}>{categoryIcons[cat]}</span>
+                    <span style={styles.categoryLabel}>{cat}</span>
+                  </button>
+                ))
+              ) : (
+                <div style={{ color: '#888', padding: '10px' }}>No categories match your search query.</div>
+              )}
+            </div>
 
-            <form onSubmit={handlePostJob} style={styles.form}>
-              <div style={styles.formGroup}>
-                <label style={styles.label}>Select Category</label>
-                <select
-                  value={jobForm.category}
-                  onChange={(e) => handleCategoryChange(e.target.value)}
-                  style={styles.input}
+            {filteredCategories.includes(jobForm.category) && (
+              <div style={styles.subcategoryWrapper}>
+                <div style={styles.subcategoryHeader}>
+                  Subcategories for <span style={{ color: '#008a5e' }}>{jobForm.category}</span>:
+                </div>
+                <div style={styles.chipRow}>
+                  {(subCategoriesData[jobForm.category] || [])
+                    .filter((subCat) =>
+                      !searchQuery || subCat.toLowerCase().includes(searchQuery.toLowerCase().trim())
+                    )
+                    .map((subCat) => (
+                      <button
+                        key={subCat}
+                        onClick={() => handleSubcategoryClick(subCat)}
+                        style={jobForm.title === subCat ? styles.chipActive : styles.chip}
+                      >
+                        {subCat}
+                      </button>
+                    ))}
+                </div>
+              </div>
+            )}
+          </section>
+
+          <section style={styles.popularSection}>
+            <h2 style={styles.popularTitle}>Popular Sewas</h2>
+            <div style={styles.popularGrid}>
+              {popularSewas.map((sewa, idx) => (
+                <div 
+                  key={idx} 
+                  style={styles.popularCard}
+                  onClick={() => handleQuickBookPopular(sewa)}
                 >
-                  {Object.keys(categoryFloors).map((cat) => (
-                    <option key={cat} value={cat}>{cat}</option>
-                  ))}
-                </select>
-              </div>
+                  <img src={sewa.image} alt={sewa.title} style={styles.popularCardImg} />
+                  <div style={styles.popularCardContent}>
+                    <h4 style={styles.popularCardTitle}>{sewa.title}</h4>
+                    <p style={styles.popularCardSub}>Projects starting at NRS {sewa.price}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
 
-              <div style={styles.formGroup}>
-                <label style={styles.label}>Job Title / Short Description</label>
-                <input
-                  type="text"
-                  placeholder="e.g. Tap leak in main bathroom"
-                  value={jobForm.title}
-                  onChange={(e) => setJobForm({ ...jobForm, title: e.target.value })}
-                  style={styles.input}
-                />
-              </div>
+          <section id="post-request-form" style={styles.formContainer}>
+            <div style={styles.card}>
+              <h2 style={styles.cardHeaderTitle}>Post a Request: {jobForm.category}</h2>
+              <p style={styles.subtext}>Connect with vetted service providers for your home needs.</p>
 
-              <div style={styles.formGroup}>
-                <label style={styles.label}>Detailed Description</label>
-                <textarea
-                  rows="3"
-                  placeholder="Provide details about the issue..."
-                  value={jobForm.description}
-                  onChange={(e) => setJobForm({ ...jobForm, description: e.target.value })}
-                  style={styles.textarea}
-                />
-              </div>
+              <form onSubmit={handleSubmit} style={styles.formGrid}>
+                {errorMessage && (
+                  <div style={styles.alertError}>
+                    {errorMessage}
+                  </div>
+                )}
 
-              <div style={styles.mediaContainer}>
-                <div style={styles.formGroup}>
-                  <label style={styles.label}>Attach Photo of Issue</label>
+                <div style={styles.fieldGroup}>
+                  <label style={styles.fieldLabel}>Selected Category</label>
+                  <select
+                    value={jobForm.category}
+                    onChange={(e) => handleCategoryChange(e.target.value)}
+                    style={styles.formInput}
+                  >
+                    {Object.keys(categoryFloors).map((cat) => (
+                      <option key={cat} value={cat}>{cat}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div style={styles.fieldGroup}>
+                  <label style={styles.fieldLabel}>Task Title / Subcategory Selected</label>
+                  <input
+                    type="text"
+                    placeholder="Click a subcategory pill above or type details here..."
+                    value={jobForm.title}
+                    onChange={(e) => setJobForm({ ...jobForm, title: e.target.value })}
+                    style={styles.formInput}
+                  />
+                </div>
+
+                <div style={styles.fieldGroup}>
+                  <label style={styles.fieldLabel}>Detailed Description</label>
+                  <textarea
+                    rows="3"
+                    placeholder="Provide details about the issue..."
+                    value={jobForm.description}
+                    onChange={(e) => setJobForm({ ...jobForm, description: e.target.value })}
+                    style={styles.formTextarea}
+                  />
+                </div>
+
+                <div style={styles.fieldGroup}>
+                  <label style={styles.fieldLabel}>
+                    Upload Photo <span style={{ color: '#dc3545' }}>*</span>
+                  </label>
                   <input
                     type="file"
                     accept="image/*"
-                    onChange={handlePhotoChange}
+                    required
+                    onChange={(e) => setPhoto(e.target.files[0])}
                     style={styles.fileInput}
                   />
-                  {photoPreview && (
-                    <div style={styles.previewBox}>
-                      <img src={photoPreview} alt="Issue preview" style={styles.imagePreview} />
-                    </div>
-                  )}
                 </div>
 
-                <div style={styles.formGroup}>
-                  <label style={styles.label}>Attach Short Video (Max 10s)</label>
+                <div style={styles.fieldGroup}>
+                  <label style={styles.fieldLabel}>
+                    Upload 10-Sec Video <span style={{ color: '#dc3545' }}>*</span>
+                  </label>
                   <input
                     type="file"
                     accept="video/*"
-                    onChange={handleVideoChange}
+                    required
+                    onChange={(e) => setVideo(e.target.files[0])}
                     style={styles.fileInput}
                   />
-                  {videoPreview && (
-                    <div style={styles.previewBox}>
-                      <video src={videoPreview} controls style={styles.videoPreview} />
-                    </div>
-                  )}
                 </div>
-              </div>
 
-              <div style={styles.formGroup}>
-                <label style={styles.label}>
-                  Offered Budget (NRS) - <small style={{ color: '#0066cc' }}>Minimum threshold: NRS {selectedFloor}</small>
-                </label>
-                <input
-                  type="number"
-                  value={jobForm.budget}
-                  min={selectedFloor}
-                  onChange={(e) => setJobForm({ ...jobForm, budget: e.target.value })}
-                  style={styles.input}
-                />
-              </div>
-
-              <div style={styles.formGroup}>
-                <label style={styles.label}>Verified Contact Phone</label>
-                <div style={styles.phoneLockRow}>
+                <div style={styles.fieldGroup}>
+                  <label style={styles.fieldLabel}>
+                    Offered Budget (NRS) — <span style={{ color: '#008a5e' }}>Min threshold: NRS {selectedFloor}</span>
+                  </label>
                   <input
-                    type="text"
-                    value={`${clientProfile.phone} (Verified)`}
-                    disabled
-                    style={styles.inputDisabled}
-                  />
-                  {!showAlternatePhone && (
-                    <button
-                      type="button"
-                      onClick={() => setShowAlternatePhone(true)}
-                      style={styles.btnSecondarySmall}
-                    >
-                      + Add Alternate Contact
-                    </button>
-                  )}
-                </div>
-              </div>
-
-              {showAlternatePhone && (
-                <div style={styles.formGroup}>
-                  <label style={styles.label}>Alternate Phone Number</label>
-                  <input
-                    type="text"
-                    placeholder="+977 98XXXXXXXX"
-                    value={jobForm.alternatePhone}
-                    onChange={(e) => setJobForm({ ...jobForm, alternatePhone: e.target.value })}
-                    style={styles.input}
+                    type="number"
+                    value={jobForm.budget}
+                    min={selectedFloor}
+                    onChange={(e) => setJobForm({ ...jobForm, budget: e.target.value })}
+                    style={styles.formInput}
                   />
                 </div>
-              )}
 
-              <button type="submit" style={styles.btnPrimary}>Submit Request</button>
-            </form>
+                <div style={styles.fieldGroup}>
+                  <label style={styles.fieldLabel}>Verified Phone</label>
+                  <div style={{ display: 'flex', gap: '10px' }}>
+                    <input
+                      type="text"
+                      value={`${clientProfile.phone} (Verified)`}
+                      disabled
+                      style={{ ...styles.formInput, backgroundColor: '#f3f4f6', flex: 1 }}
+                    />
+                    {!showAlternatePhone && (
+                      <button
+                        type="button"
+                        onClick={() => setShowAlternatePhone(true)}
+                        style={styles.btnSecondarySmall}
+                      >
+                        + Alternate Contact
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {showAlternatePhone && (
+                  <div style={styles.fieldGroup}>
+                    <label style={styles.fieldLabel}>Alternate Phone Number</label>
+                    <input
+                      type="text"
+                      placeholder="+977 98XXXXXXXX"
+                      value={jobForm.alternatePhone}
+                      onChange={(e) => setJobForm({ ...jobForm, alternatePhone: e.target.value })}
+                      style={styles.formInput}
+                    />
+                  </div>
+                )}
+
+                <button type="submit" style={styles.primaryBtn}>
+                  Submit Request
+                </button>
+              </form>
+            </div>
           </section>
-        )}
+        </>
+      )}
 
-        {activeTab === 'myJobs' && (
-          <section style={styles.section}>
-            <h2>My Active Requests</h2>
-            <p style={styles.subtext}>Track received technician bids, manage offers, or chat with assigned workers.</p>
+      {/* Active Requests View */}
+      {activeTab === 'myJobs' && (
+        <section style={styles.mainContent}>
+          <h2>My Active Requests</h2>
+          <p style={styles.subtext}>Manage bids and view assigned technicians.</p>
 
+          <div style={styles.tableCard}>
             <table style={styles.table}>
               <thead>
                 <tr>
@@ -567,7 +703,7 @@ export default function ClientView() {
                           onClick={() => handleOpenChat(job.id)}
                           style={styles.btnChatSmall}
                         >
-                          💬 Chat with Worker
+                          Chat
                         </button>
                       )}
                     </td>
@@ -575,164 +711,169 @@ export default function ClientView() {
                 ))}
               </tbody>
             </table>
+          </div>
 
-            {selectedJobForBids && (
-              <div style={styles.bidsModalOverlay}>
-                <div style={styles.bidsModal}>
-                  <div style={styles.modalHeader}>
-                    <h3>Bids for {selectedJobForBids.id}: {selectedJobForBids.title}</h3>
-                    <button onClick={() => setSelectedJobForBids(null)} style={styles.btnClose}>Close</button>
-                  </div>
-                  {selectedJobForBids.bids && selectedJobForBids.bids.length > 0 ? (
-                    <div style={styles.bidsList}>
-                      {selectedJobForBids.bids.map((bid) => (
-                        <div key={bid.id} style={styles.bidCard}>
-                          <div>
-                            <strong>{bid.workerName}</strong> (Rating: {bid.rating} / 5)
-                            <div style={styles.bidAmount}>Offered Price: NRS {bid.bidAmount}</div>
-                          </div>
-                          <div>
-                            {selectedJobForBids.status === "Assigned" ? (
-                              bid.id === selectedJobForBids.assignedWorkerId || bid.status === "Accepted" ? (
-                                <span style={styles.badgeSuccess}>Assigned (Accepted)</span>
-                              ) : (
-                                <span style={styles.badgeDanger}>Rejected</span>
-                              )
-                            ) : bid.status === "Rejected" ? (
-                              <span style={styles.badgeDanger}>Rejected</span>
+          {selectedJobForBids && (
+            <div style={styles.bidsModalOverlay}>
+              <div style={styles.bidsModal}>
+                <div style={styles.modalHeader}>
+                  <h3>Bids for {selectedJobForBids.id}: {selectedJobForBids.title}</h3>
+                  <button onClick={() => setSelectedJobForBids(null)} style={styles.btnClose}>Close</button>
+                </div>
+                {selectedJobForBids.bids && selectedJobForBids.bids.length > 0 ? (
+                  <div style={styles.bidsList}>
+                    {selectedJobForBids.bids.map((bid) => (
+                      <div key={bid.id} style={styles.bidCard}>
+                        <div>
+                          <strong>{bid.workerName}</strong> (Rating: {bid.rating} / 5)
+                          <div style={styles.bidAmount}>Offered Price: NRS {bid.bidAmount}</div>
+                        </div>
+                        <div>
+                          {selectedJobForBids.status === "Assigned" ? (
+                            bid.id === selectedJobForBids.assignedWorkerId || bid.status === "Accepted" ? (
+                              <span style={styles.badgeSuccess}>Assigned (Accepted)</span>
                             ) : (
-                              <div style={{ display: 'flex', gap: '8px' }}>
-                                <button onClick={() => handleAcceptBid(selectedJobForBids.id, bid)} style={styles.btnSuccess}>Accept</button>
-                                <button onClick={() => handleRejectBid(selectedJobForBids.id, bid.id)} style={styles.btnDangerSmall}>Reject</button>
-                              </div>
-                            )}
-                          </div>
+                              <span style={styles.badgeDanger}>Rejected</span>
+                            )
+                          ) : bid.status === "Rejected" ? (
+                            <span style={styles.badgeDanger}>Rejected</span>
+                          ) : (
+                            <div style={{ display: 'flex', gap: '8px' }}>
+                              <button onClick={() => handleAcceptBid(selectedJobForBids.id, bid)} style={styles.btnSuccess}>Accept</button>
+                              <button onClick={() => handleRejectBid(selectedJobForBids.id, bid.id)} style={styles.btnDangerSmall}>Reject</button>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p style={{ color: '#666', marginTop: '15px' }}>No bids received for this request yet.</p>
+                )}
+              </div>
+            </div>
+          )}
+        </section>
+      )}
+
+      {/* Messaging View */}
+      {activeTab === 'messages' && (
+        <section style={styles.mainContent}>
+          <h2>Messages & Work Coordination</h2>
+          <p style={styles.subtext}>Chat with assigned technicians to discuss schedules.</p>
+
+          {assignedJobs.length > 0 ? (
+            <div style={styles.chatContainer}>
+              <div style={styles.chatSidebar}>
+                <h4 style={{ margin: '0 0 10px 0', fontSize: '14px', color: '#555' }}>Assigned Jobs</h4>
+                {assignedJobs.map(job => (
+                  <div
+                    key={job.id}
+                    onClick={() => setActiveChatJobId(job.id)}
+                    style={activeChatJobId === job.id ? styles.chatTabActive : styles.chatTab}
+                  >
+                    <strong>{job.workerName}</strong>
+                    <div style={{ fontSize: '12px', color: '#666', marginTop: '2px' }}>{job.title} ({job.id})</div>
+                  </div>
+                ))}
+              </div>
+
+              <div style={styles.chatBox}>
+                {activeChatJob ? (
+                  <>
+                    <div style={styles.chatHeader}>
+                      <strong>Technician: {activeChatJob.workerName}</strong>
+                      <span style={{ fontSize: '12px', color: '#666' }}>Job: {activeChatJob.title}</span>
+                    </div>
+
+                    <div style={styles.chatMessagesList}>
+                      {(chatMessages[activeChatJobId] || []).map(msg => (
+                        <div
+                          key={msg.id}
+                          style={msg.role === 'client' ? styles.clientBubble : styles.workerBubble}
+                        >
+                          <div style={styles.msgSender}>{msg.sender}</div>
+                          <div>{msg.text}</div>
+                          <div style={styles.msgTime}>{msg.timestamp}</div>
                         </div>
                       ))}
                     </div>
-                  ) : (
-                    <p style={{ color: '#666', marginTop: '15px' }}>No bids received for this request yet.</p>
-                  )}
-                </div>
-              </div>
-            )}
-          </section>
-        )}
 
-        {activeTab === 'messages' && (
-          <section style={styles.section}>
-            <h2>Messages & Work Coordination</h2>
-            <p style={styles.subtext}>Chat with assigned technicians to discuss job schedules and requirements.</p>
-
-            {assignedJobs.length > 0 ? (
-              <div style={styles.chatContainer}>
-                <div style={styles.chatSidebar}>
-                  <h4 style={{ margin: '0 0 10px 0', fontSize: '14px', color: '#555' }}>Assigned Jobs</h4>
-                  {assignedJobs.map(job => (
-                    <div
-                      key={job.id}
-                      onClick={() => setActiveChatJobId(job.id)}
-                      style={activeChatJobId === job.id ? styles.chatTabActive : styles.chatTab}
-                    >
-                      <strong>{job.workerName}</strong>
-                      <div style={{ fontSize: '12px', color: '#666', marginTop: '2px' }}>{job.title} ({job.id})</div>
-                    </div>
-                  ))}
-                </div>
-
-                <div style={styles.chatBox}>
-                  {activeChatJob ? (
-                    <>
-                      <div style={styles.chatHeader}>
-                        <strong>Technician: {activeChatJob.workerName}</strong>
-                        <span style={{ fontSize: '12px', color: '#666' }}>Job: {activeChatJob.title}</span>
-                      </div>
-
-                      <div style={styles.chatMessagesList}>
-                        {(chatMessages[activeChatJobId] || []).map(msg => (
-                          <div
-                            key={msg.id}
-                            style={msg.role === 'client' ? styles.clientBubble : styles.workerBubble}
-                          >
-                            <div style={styles.msgSender}>{msg.sender}</div>
-                            <div>{msg.text}</div>
-                            <div style={styles.msgTime}>{msg.timestamp}</div>
-                          </div>
-                        ))}
-                      </div>
-
-                      <form onSubmit={handleSendMessage} style={styles.chatInputRow}>
-                        <input
-                          type="text"
-                          placeholder="Type your message here..."
-                          value={newMessageText}
-                          onChange={(e) => setNewMessageText(e.target.value)}
-                          style={styles.chatInput}
-                        />
-                        <button type="submit" style={styles.btnPrimary}>Send</button>
-                      </form>
-                    </>
-                  ) : (
-                    <div style={{ padding: '20px', color: '#888' }}>Select a conversation from the left to start chatting.</div>
-                  )}
-                </div>
-              </div>
-            ) : (
-              <div style={{ color: '#888', padding: '20px 0' }}>
-                No assigned technicians yet. Once you accept a worker's bid, messaging will open here.
-              </div>
-            )}
-          </section>
-        )}
-
-        {activeTab === 'profile' && (
-          <section style={styles.section}>
-            <h2>My Profile & Account Details</h2>
-            <p style={styles.subtext}>Manage your personal information and view service history.</p>
-
-            <div style={styles.profileCard}>
-              <div style={styles.profileGrid}>
-                <div><strong>Full Name:</strong> {clientProfile.name}</div>
-                <div><strong>Email:</strong> {clientProfile.email}</div>
-                <div><strong>Phone:</strong> {clientProfile.phone}</div>
-                <div><strong>Location:</strong> {clientProfile.address}</div>
-                <div><strong>Member Since:</strong> {clientProfile.memberSince}</div>
-                <div><strong>Total Requests:</strong> {totalRequestsCount}</div>
+                    <form onSubmit={handleSendMessage} style={styles.chatInputRow}>
+                      <input
+                        type="text"
+                        placeholder="Type your message here..."
+                        value={newMessageText}
+                        onChange={(e) => setNewMessageText(e.target.value)}
+                        style={styles.chatInput}
+                      />
+                      <button type="submit" style={styles.primaryBtnSmall}>Send</button>
+                    </form>
+                  </>
+                ) : (
+                  <div style={{ padding: '20px', color: '#888' }}>Select a conversation to start chatting.</div>
+                )}
               </div>
             </div>
-
-            <h3 style={styles.subHeading}>Past Completed Services & Reviews ({completedServices.length})</h3>
-            <div style={styles.historyContainer}>
-              {completedServices.map((service) => (
-                <div key={service.id} style={styles.historyCard}>
-                  <div style={styles.historyHeader}>
-                    <strong>{service.title} ({service.id})</strong>
-                    <span style={styles.badgeSuccess}>Completed</span>
-                  </div>
-                  <div style={styles.historySub}>
-                    <span>Category: {service.category}</span> | 
-                    <span> Technician: {service.workerName}</span> | 
-                    <span> Paid: NRS {service.paidAmount}</span> | 
-                    <span> Date: {service.date}</span>
-                  </div>
-                  <div style={styles.reviewBox}>
-                    <strong>Your Review ({service.review.rating} / 5 Stars):</strong>
-                    <p style={{ margin: '4px 0 0 0', color: '#555' }}>"{service.review.comment}"</p>
-                  </div>
-                </div>
-              ))}
+          ) : (
+            <div style={{ color: '#888', padding: '20px 0' }}>
+              No assigned technicians yet.
             </div>
-          </section>
-        )}
+          )}
+        </section>
+      )}
 
-        {activeTab === 'complaint' && (
-          <section style={styles.section}>
-            <h2>File a Service Complaint</h2>
-            <p style={styles.subtext}>Search for a service request to report tardiness, quality issues, or extra fee demands.</p>
+      {/* User Profile View */}
+      {activeTab === 'profile' && (
+        <section style={styles.mainContent}>
+          <h2>My Profile & Account</h2>
+          <p style={styles.subtext}>View profile overview and completed task history.</p>
 
-            <form onSubmit={handleFileComplaint} style={styles.form}>
-              <div style={styles.formGroup}>
-                <label style={styles.label}>Search and Select Job to Report</label>
+          <div style={styles.card}>
+            <div style={styles.profileGrid}>
+              <div><strong>Full Name:</strong> {clientProfile.name}</div>
+              <div><strong>Email:</strong> {clientProfile.email}</div>
+              <div><strong>Phone:</strong> {clientProfile.phone}</div>
+              <div><strong>Location:</strong> {clientProfile.address}</div>
+              <div><strong>Member Since:</strong> {clientProfile.memberSince}</div>
+              <div><strong>Total Requests:</strong> {totalRequestsCount}</div>
+            </div>
+          </div>
+
+          <h3 style={styles.subHeading}>Completed Services & Reviews ({completedServices.length})</h3>
+          <div style={styles.historyContainer}>
+            {completedServices.map((service) => (
+              <div key={service.id} style={styles.historyCard}>
+                <div style={styles.historyHeader}>
+                  <strong>{service.title} ({service.id})</strong>
+                  <span style={styles.badgeSuccess}>Completed</span>
+                </div>
+                <div style={styles.historySub}>
+                  <span>Category: {service.category}</span> | 
+                  <span> Technician: {service.workerName}</span> | 
+                  <span> Paid: NRS {service.paidAmount}</span> | 
+                  <span> Date: {service.date}</span>
+                </div>
+                <div style={styles.reviewBox}>
+                  <strong>Your Review ({service.review.rating} / 5 Stars):</strong>
+                  <p style={{ margin: '4px 0 0 0', color: '#555' }}>"{service.review.comment}"</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* Filing Complaints View */}
+      {activeTab === 'complaint' && (
+        <section style={styles.mainContent}>
+          <h2>File a Service Complaint</h2>
+          <p style={styles.subtext}>Report issues related to delay, poor quality, or incorrect billing.</p>
+
+          <div style={styles.card}>
+            <form onSubmit={handleFileComplaint} style={styles.formGrid}>
+              <div style={styles.fieldGroup}>
+                <label style={styles.fieldLabel}>Search and Select Job</label>
                 
                 {selectedJobForComplaint ? (
                   <div style={styles.selectedJobBox}>
@@ -751,10 +892,10 @@ export default function ClientView() {
                   <div>
                     <input
                       type="text"
-                      placeholder="Type Job ID, title, or category to search..."
+                      placeholder="Type Job ID, title, or category..."
                       value={complaintJobSearch}
                       onChange={(e) => setComplaintJobSearch(e.target.value)}
-                      style={styles.input}
+                      style={styles.formInput}
                     />
 
                     {complaintJobSearch.trim() && (
@@ -781,23 +922,25 @@ export default function ClientView() {
                 )}
               </div>
 
-              <div style={styles.formGroup}>
-                <label style={styles.label}>Describe Complaint</label>
+              <div style={styles.fieldGroup}>
+                <label style={styles.fieldLabel}>Describe Complaint</label>
                 <textarea
                   rows="4"
                   placeholder="Explain what went wrong..."
                   value={complaintForm.issue}
                   onChange={(e) => setComplaintForm({ ...complaintForm, issue: e.target.value })}
-                  style={styles.textarea}
+                  style={styles.formTextarea}
                 />
               </div>
 
               <button type="submit" style={styles.btnDanger}>Submit Complaint</button>
             </form>
+          </div>
 
-            <div style={{ marginTop: '30px' }}>
-              <h3>My Submitted Complaints ({complaints.length})</h3>
-              {complaints.length > 0 ? (
+          <div style={{ marginTop: '30px' }}>
+            <h3>Submitted Complaints ({complaints.length})</h3>
+            {complaints.length > 0 ? (
+              <div style={styles.tableCard}>
                 <table style={styles.table}>
                   <thead>
                     <tr>
@@ -822,86 +965,102 @@ export default function ClientView() {
                     ))}
                   </tbody>
                 </table>
-              ) : (
-                <p style={{ color: '#888', marginTop: '10px' }}>No complaints filed yet.</p>
-              )}
-            </div>
-          </section>
-        )}
-      </main>
+              </div>
+            ) : (
+              <p style={{ color: '#888', marginTop: '10px' }}>No complaints filed yet.</p>
+            )}
+          </div>
+        </section>
+      )}
     </div>
   );
 }
 
 const styles = {
-  pageLayout: { display: 'flex', minHeight: '100vh', fontFamily: 'Arial, sans-serif' },
-  sidebar: { width: '250px', backgroundColor: '#2c3e50', color: '#fff', padding: '20px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' },
-  sidebarHeader: { marginBottom: '20px' },
-  sidebarFooter: { paddingTop: '20px', borderTop: '1px solid #34495e' },
-  backLink: { color: '#1abc9c', textDecoration: 'none', fontSize: '14px', fontWeight: 'bold' },
-  sidebarTitle: { fontSize: '22px', margin: '0', color: '#ecf0f1' },
-  userBadge: { fontSize: '13px', color: '#1abc9c', margin: '4px 0 0 0', fontWeight: 'bold' },
-  navMenu: { display: 'flex', flexDirection: 'column', gap: '10px' },
-  navBtn: { padding: '12px 15px', backgroundColor: 'transparent', color: '#bdc3c7', border: 'none', textAlign: 'left', borderRadius: '6px', cursor: 'pointer', fontSize: '15px' },
-  navBtnActive: { padding: '12px 15px', backgroundColor: '#34495e', color: '#fff', borderLeft: '4px solid #1abc9c', textAlign: 'left', borderRadius: '4px', cursor: 'pointer', fontSize: '15px', fontWeight: 'bold' },
-  contentArea: { flex: 1, padding: '30px', backgroundColor: '#f4f6f7' },
-  section: { backgroundColor: '#fff', padding: '25px', borderRadius: '8px', border: '1px solid #e1e8ed', maxWidth: '850px' },
-  subtext: { color: '#666', fontSize: '14px', marginTop: '4px', marginBottom: '20px' },
+  appContainer: { fontFamily: 'Inter, system-ui, -apple-system, sans-serif', backgroundColor: '#f9fafb', minHeight: '100vh', color: '#2d3748' },
+  navbar: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 40px', backgroundColor: '#ffffff', borderBottom: '1px solid #e5e7eb' },
+  logoText: { fontSize: '28px', fontWeight: '800', color: '#008a5e', letterSpacing: '-0.5px' },
+  navLinks: { display: 'flex', gap: '20px', alignItems: 'center' },
+  navLink: { background: 'none', border: 'none', fontSize: '15px', color: '#4b5563', cursor: 'pointer', fontWeight: '500' },
+  navLinkActive: { background: 'none', border: 'none', fontSize: '15px', color: '#008a5e', cursor: 'pointer', fontWeight: '700' },
+  btnOutline: { border: '1px solid #008a5e', color: '#008a5e', padding: '8px 16px', borderRadius: '20px', textDecoration: 'none', fontSize: '14px', fontWeight: '600' },
+  heroSection: { display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '40px 20px 30px 20px', backgroundColor: '#ffffff', textAlign: 'center', borderBottom: '1px solid #f0f0f0' },
+  heroTitle: { fontSize: '38px', fontWeight: '800', color: '#0e4235', marginBottom: '24px', letterSpacing: '-1px' },
+  searchBarContainer: { display: 'flex', width: '100%', maxWidth: '600px', border: '1px solid #d1d5db', borderRadius: '30px', padding: '4px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)', marginBottom: '30px' },
+  searchInput: { flex: 1, border: 'none', padding: '12px 24px', borderRadius: '30px 0 0 30px', outline: 'none', fontSize: '15px' },
+  searchBtn: { backgroundColor: '#008a5e', border: 'none', color: '#fff', borderRadius: '50%', width: '44px', height: '44px', cursor: 'pointer', display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '16px' },
+  categoryStrip: { display: 'flex', gap: '24px', marginBottom: '25px', overflowX: 'auto', padding: '10px 5px', width: '100%', maxWidth: '1100px', scrollbarWidth: 'thin' },
+  categoryIcon: { display: 'flex', flexDirection: 'column', alignItems: 'center', backgroundColor: 'transparent', border: 'none', cursor: 'pointer', color: '#4b5563', gap: '8px', minWidth: '95px', padding: '8px', borderRadius: '8px', transition: 'all 0.2s', opacity: 1 },
+  categoryIconActive: { display: 'flex', flexDirection: 'column', alignItems: 'center', border: 'none', cursor: 'pointer', color: '#008a5e', gap: '8px', minWidth: '95px', padding: '8px', borderRadius: '8px', backgroundColor: '#e6f4f0', fontWeight: 'bold', opacity: 1 },
+  categoryLabel: { fontSize: '12px', textAlign: 'center', lineHeight: '1.3', wordWrap: 'break-word', width: '100%' },
+  subcategoryWrapper: { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px', maxWidth: '1000px', width: '100%' },
+  subcategoryHeader: { fontSize: '14px', fontWeight: '600', color: '#4b5563' },
+  chipRow: { display: 'flex', gap: '10px', flexWrap: 'wrap', justifyContent: 'center' },
+  chip: { border: '1px solid #d1d5db', backgroundColor: '#ffffff', padding: '8px 18px', borderRadius: '20px', cursor: 'pointer', fontSize: '13px', color: '#374151', transition: 'all 0.2s' },
+  chipActive: { border: '1px solid #008a5e', backgroundColor: '#008a5e', padding: '8px 18px', borderRadius: '20px', cursor: 'pointer', fontSize: '13px', color: '#ffffff', fontWeight: '600', boxShadow: '0 2px 4px rgba(0,138,94,0.2)' },
+  popularSection: { maxWidth: '1100px', margin: '40px auto 10px auto', padding: '0 20px' },
+  popularTitle: { fontSize: '24px', fontWeight: '800', color: '#0e4235', marginBottom: '20px' },
+  popularGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '20px' },
+  popularCard: { backgroundColor: '#ffffff', borderRadius: '12px', overflow: 'hidden', border: '1px solid #e5e7eb', boxShadow: '0 2px 5px rgba(0,0,0,0.05)', cursor: 'pointer', transition: 'transform 0.2s' },
+  popularCardImg: { width: '100%', height: '140px', objectFit: 'cover' },
+  popularCardContent: { padding: '16px' },
+  popularCardTitle: { fontSize: '16px', fontWeight: '700', color: '#111827', margin: '0 0 4px 0' },
+  popularCardSub: { fontSize: '13px', color: '#6b7280', margin: 0 },
+  formContainer: { maxWidth: '750px', margin: '30px auto', padding: '0 20px' },
+  mainContent: { maxWidth: '900px', margin: '30px auto', padding: '0 20px' },
+  card: { backgroundColor: '#ffffff', borderRadius: '12px', padding: '28px', border: '1px solid #e5e7eb', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' },
+  cardHeaderTitle: { color: '#0e4235', marginTop: 0, marginBottom: '6px' },
+  subtext: { color: '#666', fontSize: '14px', marginTop: '0', marginBottom: '20px' },
+  formGrid: { display: 'flex', flexDirection: 'column', gap: '16px' },
+  fieldGroup: { display: 'flex', flexDirection: 'column', gap: '6px', flex: 1 },
+  fieldLabel: { fontSize: '14px', fontWeight: '600', color: '#374151' },
+  formInput: { padding: '10px 14px', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '14px' },
+  formTextarea: { padding: '10px 14px', borderRadius: '8px', border: '1px solid #d1d5db', fontSize: '14px', resize: 'vertical' },
+  fileInput: { padding: '6px', fontSize: '13px', border: '1px dashed #ccc', borderRadius: '6px', backgroundColor: '#fafafa' },
+  primaryBtn: { backgroundColor: '#008a5e', color: '#ffffff', border: 'none', padding: '12px 24px', borderRadius: '24px', fontSize: '15px', fontWeight: '700', cursor: 'pointer', alignSelf: 'flex-start' },
+  primaryBtnSmall: { backgroundColor: '#008a5e', color: '#ffffff', border: 'none', padding: '8px 16px', borderRadius: '18px', fontSize: '13px', fontWeight: '700', cursor: 'pointer' },
+  btnDanger: { backgroundColor: '#dc3545', color: '#fff', border: 'none', padding: '10px 18px', borderRadius: '20px', cursor: 'pointer', fontWeight: 'bold', alignSelf: 'flex-start' },
+  btnDangerSmall: { backgroundColor: '#dc3545', color: '#fff', border: 'none', padding: '4px 10px', borderRadius: '12px', cursor: 'pointer', fontSize: '12px', fontWeight: 'bold' },
+  btnChatSmall: { backgroundColor: '#008a5e', color: '#fff', border: 'none', padding: '4px 10px', borderRadius: '12px', cursor: 'pointer', fontSize: '12px', fontWeight: 'bold' },
+  btnSuccess: { backgroundColor: '#28a745', color: '#fff', border: 'none', padding: '4px 10px', borderRadius: '12px', cursor: 'pointer', fontSize: '12px', fontWeight: 'bold' },
+  btnSecondarySmall: { backgroundColor: '#6c757d', color: '#fff', border: 'none', padding: '6px 12px', borderRadius: '14px', cursor: 'pointer', fontSize: '12px', fontWeight: 'bold' },
+  btnCall: { backgroundColor: '#0284c7', color: '#fff', border: 'none', padding: '4px 10px', borderRadius: '12px', fontSize: '12px', cursor: 'pointer', fontWeight: 'bold' },
+  alertError: { backgroundColor: '#fee2e2', color: '#991b1b', padding: '10px', borderRadius: '8px', fontSize: '14px', marginBottom: '16px' },
+  tableCard: { backgroundColor: '#ffffff', borderRadius: '12px', border: '1px solid #e5e7eb', overflow: 'hidden' },
+  table: { width: '100%', borderCollapse: 'collapse', backgroundColor: '#fff' },
+  th: { borderBottom: '1px solid #e5e7eb', padding: '12px', textAlign: 'left', backgroundColor: '#f9fafb', fontSize: '13px', color: '#4b5563' },
+  td: { borderBottom: '1px solid #e5e7eb', padding: '12px', fontSize: '14px' },
+  badgeSuccess: { backgroundColor: '#e6f4f0', color: '#008a5e', padding: '4px 8px', borderRadius: '12px', fontSize: '12px', fontWeight: '600' },
+  badgeWarning: { backgroundColor: '#fff3cd', color: '#856404', padding: '4px 8px', borderRadius: '12px', fontSize: '12px', fontWeight: '600' },
+  badgeDanger: { backgroundColor: '#f8d7da', color: '#721c24', padding: '4px 8px', borderRadius: '12px', fontSize: '12px', fontWeight: '600' },
   subHeading: { marginTop: '25px', marginBottom: '15px', fontSize: '18px' },
-  form: { display: 'flex', flexDirection: 'column', gap: '15px' },
-  formGroup: { display: 'flex', flexDirection: 'column', gap: '6px', flex: 1 },
-  mediaContainer: { display: 'flex', gap: '15px', flexWrap: 'wrap' },
-  label: { fontWeight: 'bold', fontSize: '14px' },
-  input: { padding: '8px 12px', fontSize: '14px', borderRadius: '4px', border: '1px solid #ccc' },
-  inputDisabled: { padding: '8px 12px', fontSize: '14px', borderRadius: '4px', border: '1px solid #ddd', backgroundColor: '#e9ecef', color: '#495057', flex: 1 },
-  phoneLockRow: { display: 'flex', gap: '10px', alignItems: 'center' },
-  fileInput: { padding: '6px', fontSize: '13px', border: '1px dashed #ccc', borderRadius: '4px', backgroundColor: '#fafafa' },
-  previewBox: { marginTop: '8px' },
-  imagePreview: { width: '100%', maxHeight: '150px', objectFit: 'cover', borderRadius: '4px', border: '1px solid #ddd' },
-  videoPreview: { width: '100%', maxHeight: '150px', borderRadius: '4px', backgroundColor: '#000' },
-  textarea: { padding: '8px 12px', fontSize: '14px', borderRadius: '4px', border: '1px solid #ccc', resize: 'vertical' },
-  btnPrimary: { backgroundColor: '#007bff', color: '#fff', border: 'none', padding: '10px 16px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', alignSelf: 'flex-start' },
-  btnDanger: { backgroundColor: '#dc3545', color: '#fff', border: 'none', padding: '10px 16px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold', alignSelf: 'flex-start' },
-  btnDangerSmall: { backgroundColor: '#dc3545', color: '#fff', border: 'none', padding: '5px 10px', borderRadius: '4px', cursor: 'pointer', fontSize: '12px', fontWeight: 'bold' },
-  btnChatSmall: { backgroundColor: '#28a745', color: '#fff', border: 'none', padding: '5px 10px', borderRadius: '4px', cursor: 'pointer', fontSize: '12px', fontWeight: 'bold' },
-  btnSuccess: { backgroundColor: '#28a745', color: '#fff', border: 'none', padding: '5px 10px', borderRadius: '4px', cursor: 'pointer', fontSize: '12px', fontWeight: 'bold' },
-  btnSecondarySmall: { backgroundColor: '#6c757d', color: '#fff', border: 'none', padding: '6px 10px', borderRadius: '4px', cursor: 'pointer', fontSize: '12px', fontWeight: 'bold' },
-  btnCall: { backgroundColor: '#17a2b8', color: '#fff', border: 'none', padding: '5px 10px', borderRadius: '4px', fontSize: '12px', cursor: 'pointer', fontWeight: 'bold' },
-  alertError: { backgroundColor: '#f8d7da', color: '#721c24', padding: '10px', borderRadius: '4px', marginBottom: '15px', border: '1px solid #f5c6cb' },
-  table: { width: '100%', borderCollapse: 'collapse', marginTop: '10px', backgroundColor: '#fff' },
-  th: { borderBottom: '2px solid #ddd', padding: '10px', textAlign: 'left' },
-  td: { borderBottom: '1px solid #ddd', padding: '10px' },
-  badgeSuccess: { backgroundColor: '#d4edda', color: '#155724', padding: '4px 8px', borderRadius: '4px', fontSize: '12px' },
-  badgeWarning: { backgroundColor: '#fff3cd', color: '#856404', padding: '4px 8px', borderRadius: '4px', fontSize: '12px' },
-  badgeDanger: { backgroundColor: '#f8d7da', color: '#721c24', padding: '4px 8px', borderRadius: '4px', fontSize: '12px' },
-  profileCard: { backgroundColor: '#fafafa', padding: '20px', borderRadius: '6px', border: '1px solid #e1e8ed', marginBottom: '20px' },
   profileGrid: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', fontSize: '15px' },
   historyContainer: { display: 'flex', flexDirection: 'column', gap: '15px' },
-  historyCard: { backgroundColor: '#fff', padding: '15px', borderRadius: '6px', border: '1px solid #e1e8ed' },
+  historyCard: { backgroundColor: '#fff', padding: '16px', borderRadius: '10px', border: '1px solid #e5e7eb' },
   historyHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' },
   historySub: { fontSize: '13px', color: '#666', marginBottom: '10px' },
-  reviewBox: { backgroundColor: '#f9f9f9', padding: '10px', borderRadius: '4px', borderLeft: '3px solid #007bff' },
-  selectedJobBox: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px', backgroundColor: '#e8f4fd', border: '1px solid #b6d4fe', borderRadius: '4px' },
-  searchResultsBox: { border: '1px solid #ccc', borderRadius: '4px', maxHeight: '150px', overflowY: 'auto', marginTop: '4px', backgroundColor: '#fff' },
+  reviewBox: { backgroundColor: '#f9fafb', padding: '10px', borderRadius: '6px', borderLeft: '3px solid #008a5e' },
+  selectedJobBox: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 14px', backgroundColor: '#e6f4f0', border: '1px solid #a3e0ce', borderRadius: '8px' },
+  searchResultsBox: { border: '1px solid #ccc', borderRadius: '8px', maxHeight: '150px', overflowY: 'auto', marginTop: '4px', backgroundColor: '#fff' },
   searchResultItem: { padding: '8px 12px', cursor: 'pointer', borderBottom: '1px solid #eee' },
   bidsModalOverlay: { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center' },
-  bidsModal: { backgroundColor: '#fff', padding: '25px', borderRadius: '8px', width: '90%', maxWidth: '500px', maxHeight: '80vh', overflowY: 'auto' },
+  bidsModal: { backgroundColor: '#fff', padding: '24px', borderRadius: '12px', width: '90%', maxWidth: '500px', maxHeight: '80vh', overflowY: 'auto' },
   modalHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #eee', paddingBottom: '10px' },
-  btnClose: { backgroundColor: '#6c757d', color: '#fff', border: 'none', padding: '4px 8px', borderRadius: '4px', cursor: 'pointer' },
+  btnClose: { backgroundColor: '#6c757d', color: '#fff', border: 'none', padding: '4px 10px', borderRadius: '12px', cursor: 'pointer' },
   bidsList: { display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '15px' },
-  bidCard: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', backgroundColor: '#f8f9fa', border: '1px solid #e9ecef', borderRadius: '6px' },
-  bidAmount: { color: '#28a745', fontWeight: 'bold', fontSize: '14px', marginTop: '2px' },
-  chatContainer: { display: 'flex', border: '1px solid #e1e8ed', borderRadius: '8px', minHeight: '400px', backgroundColor: '#fff' },
+  bidCard: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', backgroundColor: '#f9fafb', border: '1px solid #e5e7eb', borderRadius: '8px' },
+  bidAmount: { color: '#008a5e', fontWeight: 'bold', fontSize: '14px', marginTop: '2px' },
+  chatContainer: { display: 'flex', border: '1px solid #e5e7eb', borderRadius: '12px', minHeight: '400px', backgroundColor: '#fff', overflow: 'hidden' },
   chatSidebar: { width: '220px', borderRight: '1px solid #eee', padding: '12px', backgroundColor: '#fafafa' },
-  chatTab: { padding: '10px', borderRadius: '6px', cursor: 'pointer', marginBottom: '6px', backgroundColor: '#fff', border: '1px solid #eee' },
-  chatTabActive: { padding: '10px', borderRadius: '6px', cursor: 'pointer', marginBottom: '6px', backgroundColor: '#e8f4fd', border: '1px solid #b6d4fe' },
+  chatTab: { padding: '10px', borderRadius: '8px', cursor: 'pointer', marginBottom: '6px', backgroundColor: '#fff', border: '1px solid #eee' },
+  chatTabActive: { padding: '10px', borderRadius: '8px', cursor: 'pointer', marginBottom: '6px', backgroundColor: '#e6f4f0', border: '1px solid #a3e0ce' },
   chatBox: { flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' },
   chatHeader: { padding: '12px 16px', borderBottom: '1px solid #eee', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#fafafa' },
   chatMessagesList: { flex: 1, padding: '16px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '10px' },
-  clientBubble: { alignSelf: 'flex-end', backgroundColor: '#007bff', color: '#fff', padding: '10px 14px', borderRadius: '12px 12px 0 12px', maxWidth: '70%', fontSize: '14px' },
-  workerBubble: { alignSelf: 'flex-start', backgroundColor: '#e9ecef', color: '#333', padding: '10px 14px', borderRadius: '12px 12px 12px 0', maxWidth: '70%', fontSize: '14px' },
+  clientBubble: { alignSelf: 'flex-end', backgroundColor: '#008a5e', color: '#fff', padding: '10px 14px', borderRadius: '12px 12px 0 12px', maxWidth: '70%', fontSize: '14px' },
+  workerBubble: { alignSelf: 'flex-start', backgroundColor: '#f3f4f6', color: '#333', padding: '10px 14px', borderRadius: '12px 12px 12px 0', maxWidth: '70%', fontSize: '14px' },
   msgSender: { fontSize: '11px', opacity: 0.8, marginBottom: '2px', fontWeight: 'bold' },
   msgTime: { fontSize: '10px', opacity: 0.7, marginTop: '4px', textAlign: 'right' },
   chatInputRow: { display: 'flex', gap: '10px', padding: '12px', borderTop: '1px solid #eee', backgroundColor: '#fff' },
-  chatInput: { flex: 1, padding: '8px 12px', fontSize: '14px', border: '1px solid #ccc', borderRadius: '4px' }
+  chatInput: { flex: 1, padding: '8px 12px', fontSize: '14px', border: '1px solid #ccc', borderRadius: '18px' }
 };
