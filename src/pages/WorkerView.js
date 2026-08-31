@@ -751,7 +751,7 @@ export default function WorkerView() {
                   📷 Attached Photo Proof:
                 </strong>
                 {inspectingJob.hasPhoto && inspectingJob.photoUrl ? (
-                  <img src={inspectingJob.photoUrl} alt="Inspection Photo" style={styles.modalImagePreview} />
+                  <img src={inspectingJob.photoUrl} alt="Inspection Attachment" style={styles.modalImagePreview} />
                 ) : (
                   <div style={styles.mediaPlaceholder}>No Image Available</div>
                 )}

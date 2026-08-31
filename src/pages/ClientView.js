@@ -404,12 +404,16 @@ export default function ClientView() {
       <header style={styles.navbar}>
         <div style={styles.navBrand}>
           {/* Clicking logo navigates to Book a Task */}
-          <span
-            style={{ ...styles.logoText, cursor: 'pointer' }}
+          <div
+            style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}
             onClick={() => setActiveTab('post')}
           >
-            sewa
-          </span>
+            <img
+              src="/images/sewa_logo.png"
+              alt="SEWA"
+              style={{ height: '36px', width: 'auto', objectFit: 'contain' }}
+            />
+          </div>
         </div>
         <nav style={styles.navLinks}>
           <button
